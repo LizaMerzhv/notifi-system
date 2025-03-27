@@ -28,7 +28,3 @@ jobs:
 
       - name: Run tests
         run: mvn test
-
-      - name: Run Flyway migrations with Maven
-        run: mvn flyway:migrate
-
