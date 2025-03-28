@@ -1,5 +1,7 @@
 package com.example.notificationapp.api_service.service;
 
+import com.example.notificationapp.api_service.dto.ContactCreateDTO;
+import com.example.notificationapp.api_service.dto.ContactUpdateDTO;
 import com.example.notificationapp.api_service.entity.Contact;
 import com.example.notificationapp.api_service.repository.ContactRepository;
 import org.apache.commons.csv.CSVFormat;
@@ -16,7 +18,6 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ContactService {
@@ -33,15 +34,12 @@ public class ContactService {
                     .withTrim();
 
             CSVParser parser = new CSVParser(reader, format);
-            // Выведем заголовки для отладки:
-            System.out.println("Заголовки CSV: " + parser.getHeaderMap());
+            System.out.println("CSV Headers: " + parser.getHeaderMap());
 
             List<Contact> contacts = new ArrayList<>();
             for (CSVRecord record : parser) {
-                // Валидация полей
                 String fullName = record.get("full_name");
                 String email = record.get("email");
-                // Можно добавить проверку формата email и обязательных полей
                 Contact contact = new Contact();
                 contact.setFullName(fullName);
                 contact.setEmail(email);
@@ -52,11 +50,48 @@ public class ContactService {
             }
             contactRepository.saveAll(contacts);
         }
-
     }
-    public Page<Contact> getContacts (Pageable pageable){
+
+    public Page<Contact> getContacts(Pageable pageable) {
         return contactRepository.findAll(pageable);
     }
+
+    public Contact createContact(ContactCreateDTO dto) {
+        Contact contact = mapToEntity(dto);
+        return contactRepository.save(contact);
+    }
+
+    public Contact getContactById(Long id) {
+        return contactRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contact not found with id " + id));
+    }
+
+    public Contact updateContact(Long id, ContactUpdateDTO dto) {
+        Contact existingContact = getContactById(id);
+        existingContact = updateEntity(existingContact, dto);
+        return contactRepository.save(existingContact);
+    }
+
+    public void deleteContact(Long id) {
+        contactRepository.deleteById(id);
+    }
+
+    private Contact mapToEntity(ContactCreateDTO dto) {
+        Contact contact = new Contact();
+        contact.setFullName(dto.getFullName());
+        contact.setEmail(dto.getEmail());
+        contact.setPhoneNumber(dto.getPhoneNumber());
+        contact.setMessengerType(dto.getMessengerType());
+        contact.setMessengerId(dto.getMessengerId());
+        return contact;
+    }
+
+    private Contact updateEntity(Contact contact, ContactUpdateDTO dto) {
+        contact.setFullName(dto.getFullName());
+        contact.setEmail(dto.getEmail());
+        contact.setPhoneNumber(dto.getPhoneNumber());
+        contact.setMessengerType(dto.getMessengerType());
+        contact.setMessengerId(dto.getMessengerId());
+        return contact;
+    }
 }
-
-
