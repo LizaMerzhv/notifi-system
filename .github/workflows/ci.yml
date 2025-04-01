@@ -1,5 +1,8 @@
 name: CI Pipeline
 
+env:
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
 on:
   push:
     branches:
