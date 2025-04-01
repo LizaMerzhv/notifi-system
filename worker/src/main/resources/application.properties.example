@@ -1,0 +1,15 @@
+spring.datasource.url=jdbc:postgresql://localhost:5432/yourdb
+spring.datasource.username=your_user
+spring.datasource.password=your_password
+
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.hibernate.ddl-auto=none
+
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+
+kafka.bootstrap-servers=localhost:9092
+
+
+
