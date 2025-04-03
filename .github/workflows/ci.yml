@@ -2,6 +2,8 @@ name: CI Pipeline
 
 env:
   KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
 
 on:
   push:
@@ -14,6 +16,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      kafka:
+        image: confluentinc/cp-kafka:latest
+        ports:
+          - 9092:9092
+        options: >-
+          --env KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+          --env KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
 
     steps:
       - name: Checkout code

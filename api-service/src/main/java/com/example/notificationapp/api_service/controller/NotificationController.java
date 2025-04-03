@@ -3,10 +3,9 @@ package com.example.notificationapp.api_service.controller;
 import com.example.notificationapp.api_service.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -20,4 +19,14 @@ public class NotificationController {
         notificationService.sendNotification(topic, message);
         return ResponseEntity.ok("Notification sent to topic " + topic);
     }
+
+    @PostMapping("/template")
+    public ResponseEntity<?> sendTemplateNotification(
+            @RequestParam String topic,
+            @RequestParam Long templateId,
+            @RequestBody Map<String, String> values) {
+        notificationService.sendTemplateNotification(topic, templateId, values);
+        return ResponseEntity.ok("Template notification sent to topic " + topic);
+    }
+
 }
