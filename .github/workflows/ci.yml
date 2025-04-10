@@ -45,7 +45,7 @@ jobs:
         uses: spicyparrot/kafka-kraft-action@v1.1.0
         with:
           kafka-version: "3.0.0"
-          kafka-topics: "notifications,1"
+          kafka-topics: "notifications,1,1"
         id: kafkaAction
 
       - name: Build with Maven
