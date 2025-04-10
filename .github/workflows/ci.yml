@@ -44,8 +44,8 @@ jobs:
       - name: Run Kafka KRaft Broker
         uses: spicyparrot/kafka-kraft-action@v1.1.0
         with:
-          kafka-version: "3.6.1"           # Укажите нужную версию Kafka
-          kafka-topics: "notifications,1"  # Создаем топик 'notifications' с 1 разделом
+          kafka-version: "3.0.14"
+          kafka-topics: "notifications,1"
         id: kafkaAction
 
       - name: Build with Maven
