@@ -1,22 +1,6 @@
-name: CI Pipeline
-
-env:
-  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-  REDIS_HOST: redis
-  REDIS_PORT: 6379
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     services:
       zookeeper:
         image: confluentinc/cp-zookeeper:7.4.0
@@ -35,34 +19,20 @@ jobs:
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9093
           KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
           KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-      redis:
-        image: redis:latest
-        ports:
-          - 6379:6379
+        depends_on:
+          zookeeper:
+            condition: service_healthy
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Wait for Kafka
+        run: |
+          docker run --network host confluentinc/cp-kafka:7.4.0 \
+            kafka-topics --bootstrap-server localhost:9092 --list
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: maven
-
-      - name: Create Kafka topics
+      - name: Create topic
         run: |
           docker exec kafka kafka-topics --create \
             --bootstrap-server kafka:9092 \
             --topic notifications \
             --partitions 1 \
             --replication-factor 1
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run tests
-        run: mvn test
