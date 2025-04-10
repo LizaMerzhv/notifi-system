@@ -18,13 +18,25 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      zookeeper:
+        image: confluentinc/cp-zookeeper:7.4.0
+        ports:
+          - 2181:2181
+        env:
+          ZOOKEEPER_CLIENT_PORT: 2181
+
       kafka:
-        image: confluentinc/cp-kafka:latest
+        image: confluentinc/cp-kafka:7.4.0
         ports:
           - 9092:9092
-        options: >-
-          --env KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
-          --env KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+          - 9093:9093
+        env:
+          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9093
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
       redis:
         image: redis:latest
         ports:
@@ -41,12 +53,13 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Run Kafka KRaft Broker
-        uses: spicyparrot/kafka-kraft-action@v1.1.0
-        with:
-          kafka-version: "3.0.0"
-          kafka-topics: "notifications,1,1"
-        id: kafkaAction
+      - name: Create Kafka topics
+        run: |
+          docker exec kafka kafka-topics --create \
+            --bootstrap-server kafka:9092 \
+            --topic notifications \
+            --partitions 1 \
+            --replication-factor 1
 
       - name: Build with Maven
         run: mvn clean install
