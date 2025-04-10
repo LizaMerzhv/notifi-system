@@ -44,7 +44,7 @@ jobs:
       - name: Run Kafka KRaft Broker
         uses: spicyparrot/kafka-kraft-action@v1.1.0
         with:
-          kafka-version: "3.0.14"
+          kafka-version: "3.0.0"
           kafka-topics: "notifications,1"
         id: kafkaAction
 
