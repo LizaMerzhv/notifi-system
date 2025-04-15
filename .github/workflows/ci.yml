@@ -30,12 +30,8 @@ jobs:
           - 9092:9092
         env:
           KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:9093
-          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-        depends_on:
-          zookeeper:
-            condition: service_healthy
 
       redis:
         image: redis:latest
@@ -53,17 +49,16 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Wait for Kafka
+      - name: Wait for Kafka to be ready
         run: |
           for i in {1..10}; do
-            docker exec kafka kafka-broker-api-versions --bootstrap-server kafka:9093 && break
-            sleep 10
+            nc -z localhost 9092 && break || sleep 5;
           done
 
       - name: Create Kafka topics
         run: |
-          docker exec kafka kafka-topics --create \
-            --bootstrap-server kafka:9093 \
+          docker exec $(docker ps --filter "name=kafka" --format "{{.ID}}") kafka-topics --create \
+            --bootstrap-server localhost:9092 \
             --topic notifications \
             --partitions 1 \
             --replication-factor 1
